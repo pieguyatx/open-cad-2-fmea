@@ -170,6 +170,72 @@
       "severity": 9,
       "occurrence": 6,
       "detection": 5
+    },
+    {
+      "match_keywords": ["wire", "cable", "harness", "awg"],
+      "function": "Electrical Power / Signal Routing",
+      "failure_mode": "Insulation Chafing / Conductor Fatigue",
+      "effect": "Short circuit to chassis, signal loss, or localized fire",
+      "cause": "Abrasion against sharp sheet metal edges or repeated flexing exceeding minimum bend radius",
+      "action": "Install edge grommets, route wires with service loops, and secure with zip ties every 100mm",
+      "severity": 9,
+      "occurrence": 6,
+      "detection": 3
+    },
+    {
+      "match_keywords": ["pcb", "printed circuit board", "motherboard"],
+      "function": "Component Integration & Electrical Routing",
+      "failure_mode": "Thermo-Mechanical Solder Joint Fracture",
+      "effect": "Intermittent electrical open circuits (especially on large BGA components)",
+      "cause": "Coefficient of Thermal Expansion (CTE) mismatch between FR4 fiberglass and silicon components during temperature cycling",
+      "action": "Apply conformal coating or underfill to large ICs; ensure PCB mounting includes vibration isolation standoffs",
+      "severity": 8,
+      "occurrence": 5,
+      "detection": 7
+    },
+    {
+      "match_keywords": ["motor", "stepper", "nema", "bldc", "dc motor"],
+      "function": "Electromechanical Power Conversion",
+      "failure_mode": "Winding Insulation Breakdown / Demagnetization",
+      "effect": "Loss of torque, skipped steps, or internal short circuit",
+      "cause": "Overheating due to sustained high current (stall condition) or restricted airflow",
+      "action": "Implement active cooling (heatsink/fan) or software stall-detection with current rollback",
+      "severity": 7,
+      "occurrence": 5,
+      "detection": 4
+    },
+    {
+      "match_keywords": ["relay", "contactor", "solenoid"],
+      "function": "Electromechanical Switching",
+      "failure_mode": "Contact Welding / Arcing",
+      "effect": "Load remains permanently energized (cannot turn off), risking safety hazards",
+      "cause": "High inrush currents or inductive voltage spikes causing arcing across contacts during switching",
+      "action": "Add a flyback diode across inductive loads and specify relays with AgSnO2 contacts for high-inrush",
+      "severity": 9,
+      "occurrence": 4,
+      "detection": 6
+    },
+    {
+      "match_keywords": ["battery", "lipo", "18650", "li-ion", "cell"],
+      "function": "Portable Energy Storage",
+      "failure_mode": "Thermal Runaway / Cell Swelling",
+      "effect": "Catastrophic fire, explosion, or casing rupture",
+      "cause": "Internal short due to dendrite growth, over-discharge, or mechanical puncture",
+      "action": "Integrate Battery Management System (BMS) with thermal cutoff, and design physical blast containment/venting enclosures",
+      "severity": 10,
+      "occurrence": 3,
+      "detection": 4
+    },
+    {
+      "match_keywords": ["switch", "microswitch", "limit_switch"],
+      "function": "Position Sensing / User Input",
+      "failure_mode": "Mechanical Spring Fatigue / Contact Oxidation",
+      "effect": "Failure to register end-stop (machine crash) or intermittent signal bouncing",
+      "cause": "Actuation cycles exceeding physical limit (e.g., >10^6 cycles) or low-current 'dry switching' failing to clean oxides",
+      "action": "Use optical/inductive sensors for high-cycle end stops, or apply wetting current for mechanical switches",
+      "severity": 8,
+      "occurrence": 5,
+      "detection": 5
     }
   ]
 }
