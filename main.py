@@ -95,9 +95,9 @@ def run_pipeline(input_file, output_csv, config_path, use_ai=False):
     print(f"[+] Success! Exported {len(fmea_records)} FMEA rows to {output_csv}")
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Windows CAD Auto-DFMEA CLI Generator")
+    parser = argparse.ArgumentParser(description="Windows CAD Auto-dFMEA CLI Generator")
     parser.add_argument("-i", "--input", required=True, help="Path to CAD file (.FCStd / .STEP)")
-    parser.add_argument("-o", "--output", default="DFMEA_Output.csv", help="Output path")
+    parser.add_argument("-o", "--output", default="dFMEA_Output.csv", help="Output path")
     parser.add_argument("--config", default="config/rules.json", help="Rules file path")
     parser.add_argument("--ai", action="store_true", help="Enable local LLM pass")
 

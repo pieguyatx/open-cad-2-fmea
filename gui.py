@@ -19,7 +19,7 @@ class FmeaGuiApp:
     """
     def __init__(self, root):
         self.root = root
-        self.root.title("Open-Source CAD Assembly DFMEA Generator")
+        self.root.title("Open-Source CAD Assembly dFMEA Generator")
         self.root.geometry("1150x680")
 
         self.selected_file = ""
@@ -36,7 +36,7 @@ class FmeaGuiApp:
         self.var_ai = tk.BooleanVar(value=False)
         ttk.Checkbutton(control_frame, text="Enable Local AI (Ollama)", variable=self.var_ai).pack(side=tk.LEFT, padx=15)
 
-        ttk.Button(control_frame, text="Run DFMEA Analysis", command=self.run_analysis).pack(side=tk.RIGHT, padx=5)
+        ttk.Button(control_frame, text="Run dFMEA Analysis", command=self.run_analysis).pack(side=tk.RIGHT, padx=5)
 
         # Middle Table Area (Displays the generated FMEA table rows)
         table_frame = ttk.Frame(root, padding=10)
@@ -59,7 +59,7 @@ class FmeaGuiApp:
         # Bottom Export Bar
         bottom_frame = ttk.Frame(root, padding=10)
         bottom_frame.pack(fill=tk.X)
-        ttk.Button(bottom_frame, text="Export DFMEA Report to CSV", command=self.export_csv).pack(side=tk.RIGHT)
+        ttk.Button(bottom_frame, text="Export dFMEA Report to CSV", command=self.export_csv).pack(side=tk.RIGHT)
 
     def browse_file(self):
         """Opens a standard Windows file picker for CAD files."""

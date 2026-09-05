@@ -1,6 +1,6 @@
-# Open-Source CAD Assembly DFMEA Generator (Windows / FreeCAD)
+# Open-Source CAD Assembly dFMEA Generator (Windows / FreeCAD)
 
-An automated Design Failure Mode and Effects Analysis (DFMEA) engine built for Windows using open-source CAD software. This utility reads 3D CAD assemblies (`.FCStd`, `.STEP`, `.STP`), extracts physical components and assembly constraints, and applies rule-based failure logic combined with local AI reasoning (via Ollama) to output AIAG-VDA compliant FMEA spreadsheets with calculated Risk Priority Numbers (RPN).
+An automated Design Failure Mode and Effects Analysis (dFMEA) engine built for Windows using open-source CAD software. This utility reads 3D CAD assemblies (`.FCStd`, `.STEP`, `.STP`), extracts physical components and assembly constraints, and applies rule-based failure logic combined with local AI reasoning (via Ollama) to output AIAG-VDA compliant FMEA spreadsheets with calculated Risk Priority Numbers (RPN).
 
 ---
 
@@ -76,7 +76,7 @@ If you design in another CAD program, you do not need to learn FreeCAD to use th
 
 3. Choose the STEP format (`.step` or `.stp`). STEP is a universal 3D format that preserves your component names, part tree hierarchy, and geometry.
 
-4. Run this DFMEA tool and select your exported `.step` file.
+4. Run this dFMEA tool and select your exported `.step` file.
 
 ## Option B: Native FreeCAD Workflow
 If you are designing entirely in FreeCAD:
@@ -87,7 +87,7 @@ If you are designing entirely in FreeCAD:
 
 3. Save your file as a standard FreeCAD Document (`.FCStd`).
 
-4. Run this DFMEA tool and select your `.FCStd` file.
+4. Run this dFMEA tool and select your `.FCStd` file.
 
 ## Usage
 

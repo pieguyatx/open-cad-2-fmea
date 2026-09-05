@@ -169,7 +169,7 @@ class LocalLLMReasonerWin:
 
     def infer_failure_modes(self, cad_context):
         prompt = f"""
-You are an expert Reliability, 3D Printing, and DFMEA Engineer.
+You are an expert Reliability, 3D Printing, and dFMEA Engineer.
 Analyze the following CAD assembly context (Components, Materials, Joints, Print Warnings) and deduce functional failure modes.
 
 CAD CONTEXT:

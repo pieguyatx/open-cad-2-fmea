@@ -1,13 +1,13 @@
 <#
 .SYNOPSIS
-    Windows Headless Execution Wrapper for CAD Auto-DFMEA Generator.
+    Windows Headless Execution Wrapper for CAD Auto-dFMEA Generator.
     Used for terminal execution instead of the graphical interface.
 #>
 
 param (
     [Parameter(Mandatory=$true)]
     [string]$InputFile,
-    [string]$OutputFile = "Windows_DFMEA.csv",
+    [string]$OutputFile = "Windows_dFMEA.csv",
     [string]$ConfigPath = "config/rules.json",
     [switch]$UseAI
 )
