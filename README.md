@@ -12,7 +12,7 @@ It is not being passed off as entirely original human-authored code. Instead, it
 ⚠️ **Engineering Disclaimer: Use Responsibly**
 This tool is highly experimental and remains in active development. FMEA is a safety-critical engineering process. **Do not use this tool as a replacement for professional engineering judgment.** By using this software, you acknowledge that it may produce incomplete or inaccurate risk assessments, and you agree that the creators, contributors, and AI generators cannot be held liable for any engineering defects, product failures, or damages resulting from its use. Always have a qualified engineer review and sign off on any FMEA documentation.  
 
-**People People and Thinking First**
+**People First and Thinking First**
 This is a tool to get you *started* thinking about risks and dangers in your designs and models, and not to replace communication with actual humans about your work and your thoughts. Do not use this to replace engineers, especially engineers just starting out! Do use this tool to learn about design and code, challenge your assumptions about a design, get started on documentation tasks that can be boring, evaluate your hobbyist design before 3D printing, and have another document to critique to exercise your brain. Thank you. :smile:
 
 ---
@@ -22,27 +22,47 @@ This is a tool to get you *started* thinking about risks and dangers in your des
 - **Free & Open-Source Stack:** Designed for hardware engineers and the 3D printing community without access to proprietary CAD suites.
 - **Native Windows Desktop UI:** Includes a Tkinter-based graphical interface for easy file selection, analysis, and CSV exporting.
 - **3D Print Geometry Checks:** Automatically flags non-manifold or thin-wall FDM slicer risks directly from CAD boundary boxes.
-- **Local AI Functional Reasoning:** Uses local LLMs (Llama 3 running via Ollama) to infer physics-of-failure modes without exposing proprietary CAD data to public cloud APIs.
+- **Local AI Functional Reasoning (100% Optional):** Uses local LLMs (Llama 3 running via Ollama) to infer physics-of-failure modes without exposing proprietary CAD data to public cloud APIs.
 
 ## Installation & Setup (Windows 10/11)
 
-### 1. Install Dependencies
-Open **PowerShell as Administrator** and install the core dependencies using Winget (Windows Package Manager):
+### 1. Install Core Dependencies
+Open **PowerShell as Administrator** and install the core dependencies using Winget (Windows Package Manager). This installs Python and FreeCAD.
 
 ```powershell
 winget install Python.Python.3.11
 winget install FreeCAD.FreeCAD
-winget install Ollama.Ollama
 ```
 *Note: Restart PowerShell after installation so your system updates environment paths.*
 
-To use the optional AI functional reasoning, start the Ollama service and download the model:
+### 2. Configure the LLM AI Engine (Completely Optional)
+The AI reasoning step is strictly optional. The program comes with a robust, physics-based rule engine (`config/rules.json`) that works instantly without any AI.
+
+If you DO NOT want to use the LLM:
+
+- Skip this step entirely.
+
+- Do not install Ollama.
+
+- When you run the software, simply leave the "Enable Local AI (Ollama)" checkbox unchecked.
+
+If you DO want to use the LLM:
+This tool uses Ollama to run AI models locally on your hardware, ensuring your CAD data never leaves your computer.
+
+1. Install Ollama via PowerShell:
+
+```powershell
+winget install Ollama.Ollama
+```
+2. Start the Ollama background service and download the default model (llama3):
 
 ```powershell
 ollama serve
 # In a separate PowerShell window:
 ollama pull llama3
 ```
+
+*Advanced LLM Configuration*: If you want to use a different model (like `phi3` or `mistral`), pull it via Ollama (`ollama pull mistral`). Then, open `src/cad_extractor.py` in a text editor, locate `class LocalLLMReasonerWin`, and change `model="llama3"` to your preferred model name.
 
 ## Getting Your CAD Files Ready
 This tool analyzes CAD Assemblies (files containing multiple connected parts).
@@ -84,6 +104,10 @@ Launch the desktop application to browse files, toggle AI analysis, and view RPN
 Run batch processing or integrate into automated toolchains without a GUI:
 
 ```powershell
+# Run WITHOUT AI:
+.\run_win.ps1 -InputFile "C:\Path\To\Assembly.STEP" -OutputFile "Report.csv"
+
+# Run WITH AI (requires Ollama running):
 .\run_win.ps1 -InputFile "C:\Path\To\Assembly.STEP" -OutputFile "Report.csv" -UseAI
 ```
 
