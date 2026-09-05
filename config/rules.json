@@ -93,7 +93,7 @@
   ],
   "components": [
     {
-      "match_keywords": ["bolt", "screw", "fastener", "heat_insert"],
+      "match_keywords": ["bolt", "screw", "fastener"],
       "function": "Clamping Joint Preload Retention",
       "failure_mode": "Thread Stripping / Plastic Wall Creep",
       "effect": "Loss of joint clamp load and physical attachment failure",
@@ -101,6 +101,17 @@
       "action": "Incorporate brass heat-set inserts (M3/M4) into 3D printed bosses",
       "severity": 8,
       "occurrence": 7,
+      "detection": 4
+    },
+    {
+      "match_keywords": ["heat insert", "threaded insert", "brass insert", "press-fit insert"],
+      "function": "Threaded Anchorage in Plastic",
+      "failure_mode": "Boss Bursting / Insert Pull-Out",
+      "effect": "Insert strips out of the plastic hole or splits the surrounding plastic boss under tightening torque",
+      "cause": "Boss wall thickness too thin relative to insert outer diameter, or insufficient heat during installation causing weak plastic reflow encapsulation",
+      "action": "Ensure minimum boss outer diameter is 2x the insert thread nominal diameter (e.g., 2x wall thickness), and use diamond-knurled ultrasonic/heat inserts",
+      "severity": 8,
+      "occurrence": 6,
       "detection": 4
     },
     {
@@ -143,6 +154,28 @@
       "effect": "Joint loosening, rattling, or structural separation",
       "cause": "Oversized drill hole, or using dissimilar metals (e.g., aluminum rivet in carbon steel sheet) in humid environments",
       "action": "Specify exact hole tolerance (e.g., #30 drill for 1/8\" rivet) and match rivet alloy to sheet metal material",
+      "severity": 8,
+      "occurrence": 5,
+      "detection": 4
+    },
+    {
+      "match_keywords": ["retaining ring", "circlip", "snap ring"],
+      "function": "Axial Component Location on Shaft/Bore",
+      "failure_mode": "Groove Shear / Ring Dislodgement",
+      "effect": "Axial migration of components, resulting in gear misalignment or mechanical jamming",
+      "cause": "Exceeding allowable thrust load ratings, or sharp-edged housing grooves causing stress concentrations",
+      "action": "Verify thrust load against manufacturer specifications and ensure proper square-corner groove machining",
+      "severity": 9,
+      "occurrence": 4,
+      "detection": 4
+    },
+    {
+      "match_keywords": ["dowel", "alignment pin", "roll pin", "spring pin"],
+      "function": "Precise Component Alignment / Shear Transfer",
+      "failure_mode": "Pin Shearing / Hole Elongation (Wallowing)",
+      "effect": "Loss of alignment registration, shifting datums, or sloppy joint play",
+      "cause": "Shear forces exceeding pin material yield strength, or soft aluminum/plastic mounting holes deforming under cyclic load",
+      "action": "Hardened steel dowels should be pressed into steel sleeves; ensure minimum 1.5D engagement depth on each side",
       "severity": 8,
       "occurrence": 5,
       "detection": 4
@@ -201,6 +234,17 @@
       "severity": 7,
       "occurrence": 4,
       "detection": 5
+    },
+    {
+      "match_keywords": ["heatsink", "heat sink", "thermal pad", "thermal paste"],
+      "function": "Thermal Dissipation / Heat Transfer",
+      "failure_mode": "Thermal Interface Degradation (Dry-Out)",
+      "effect": "Component overheating, thermal throttling, or semiconductor failure",
+      "cause": "Pump-out effect of thermal paste under thermal cycling, or dry-out/delamination of thermal pads",
+      "action": "Specify phase-change thermal interface materials (TIM) or high-molecular-weight silicone pads with mechanical hold-down spring clips",
+      "severity": 8,
+      "occurrence": 5,
+      "detection": 6
     },
     {
       "match_keywords": ["capacitor", "electrolytic", "e-cap"],
@@ -267,6 +311,17 @@
       "severity": 8,
       "occurrence": 4,
       "detection": 7
+    },
+    {
+      "match_keywords": ["fuse", "circuit breaker", "ptc"],
+      "function": "Overcurrent Circuit Protection",
+      "failure_mode": "Nuisance Tripping / Arc Flash Failure",
+      "effect": "Unplanned system shutdown or catastrophic continuation of fault current if arc fails to quench",
+      "cause": "Inadequate $I^2t$ fusing rating sizing for high-inrush loads, or breaking capacity exceeded on DC voltages",
+      "action": "Select slow-blow fuses for inductive/motor inrush loads and verify DC voltage rating matches circuit source",
+      "severity": 9,
+      "occurrence": 3,
+      "detection": 5
     },
     {
       "match_keywords": ["motor", "stepper", "nema", "bldc", "dc motor"],
