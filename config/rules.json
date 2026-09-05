@@ -69,6 +69,26 @@
       "severity": 7,
       "occurrence": 5,
       "detection": 6
+    },
+    {
+      "match_keywords": ["vhb", "foam tape", "double sided tape", "psa"],
+      "failure_mode": "Adhesive Cleavage / Peel Failure",
+      "effect": "Total loss of adhesion and component detachment",
+      "cause": "Joint designed with cleavage/peel stresses instead of pure shear, or inadequate surface energy prep (no IPA wipe)",
+      "action": "Redesign joint to ensure loads are in shear/tension only; specify 50/50 IPA wipe and 15 PSI application pressure",
+      "severity": 8,
+      "occurrence": 6,
+      "detection": 7
+    },
+    {
+      "match_keywords": ["foil tape", "copper tape", "aluminum tape", "emi tape"],
+      "failure_mode": "Loss of EMI Shielding Effectiveness",
+      "effect": "Ground loop creation, electromagnetic interference, or failure to pass FCC/CE emissions testing",
+      "cause": "Oxidation of the conductive adhesive over time or galvanic corrosion at the grounding point",
+      "action": "Specify conductive acrylic adhesives and ensure mating metals are galvanically compatible (within 0.15V anodic index)",
+      "severity": 7,
+      "occurrence": 5,
+      "detection": 8
     }
   ],
   "components": [
@@ -104,6 +124,39 @@
       "severity": 8,
       "occurrence": 6,
       "detection": 2
+    },
+    {
+      "match_keywords": ["patched screw", "nylok", "tuflok", "thread patch"],
+      "function": "Self-Locking Thread Engagement",
+      "failure_mode": "Loss of Locking Friction / Galling",
+      "effect": "Fastener backs out under vibration, or patch shreds and contaminates the assembly",
+      "cause": "Fastener subjected to more than 3 insertion/removal cycles, destroying the nylon patch",
+      "action": "Specify patched screws as single-use service items in maintenance manuals",
+      "severity": 7,
+      "occurrence": 7,
+      "detection": 3
+    },
+    {
+      "match_keywords": ["rivet", "blind rivet", "pop rivet"],
+      "function": "Permanent Structural Fastening",
+      "failure_mode": "Mandrel Pull-Through / Galvanic Corrosion",
+      "effect": "Joint loosening, rattling, or structural separation",
+      "cause": "Oversized drill hole, or using dissimilar metals (e.g., aluminum rivet in carbon steel sheet) in humid environments",
+      "action": "Specify exact hole tolerance (e.g., #30 drill for 1/8\" rivet) and match rivet alloy to sheet metal material",
+      "severity": 8,
+      "occurrence": 5,
+      "detection": 4
+    },
+    {
+      "match_keywords": ["bracket", "sheet metal", "bent metal"],
+      "function": "Structural Mounting / Support",
+      "failure_mode": "Bend Radius Cracking / Fatigue Failure",
+      "effect": "Loss of structural integrity at the bend line, breaking under load",
+      "cause": "Bending parallel to the material grain direction, or inside bend radius being too tight for the material thickness and temper",
+      "action": "Enforce minimum inside bend radius (e.g., 1x or 2x material thickness) and orient flat patterns 45 or 90 degrees to rolling grain",
+      "severity": 9,
+      "occurrence": 4,
+      "detection": 5
     },
     {
       "match_keywords": ["o-ring", "oring", "seal", "gasket"],
@@ -194,6 +247,28 @@
       "detection": 7
     },
     {
+      "match_keywords": ["ferrite", "choke", "bead"],
+      "function": "High-Frequency EMI Attenuation",
+      "failure_mode": "Core Saturation",
+      "effect": "Loss of high-frequency filtering capability, allowing EMI to pass through and failing EMC compliance",
+      "cause": "DC bias current exceeding the ferrite core's magnetic saturation threshold",
+      "action": "Verify peak DC operational current is well below the ferrite saturation rating; increase package size if necessary",
+      "severity": 7,
+      "occurrence": 5,
+      "detection": 8
+    },
+    {
+      "match_keywords": ["kapton", "polyimide tape", "pi tape"],
+      "function": "High-Temperature Electrical Insulation",
+      "failure_mode": "Mechanical Puncture / Dielectric Breakdown",
+      "effect": "Short circuiting across protected components or layers",
+      "cause": "Sharp solder tails or through-hole pins piercing the thin tape layer under compression",
+      "action": "Apply tape with minimum 50% overlap and clip sharp through-hole leads prior to application",
+      "severity": 8,
+      "occurrence": 4,
+      "detection": 7
+    },
+    {
       "match_keywords": ["motor", "stepper", "nema", "bldc", "dc motor"],
       "function": "Electromechanical Power Conversion",
       "failure_mode": "Winding Insulation Breakdown / Demagnetization",
@@ -203,6 +278,17 @@
       "severity": 7,
       "occurrence": 5,
       "detection": 4
+    },
+    {
+      "match_keywords": ["servo", "servomotor", "encoder"],
+      "function": "Closed-Loop Position Control",
+      "failure_mode": "Optical Encoder Tracking Fault",
+      "effect": "Loss of position data resulting in violent motor runaway or immediate system halt",
+      "cause": "Ingress of dust/oil onto the optical disk, or severe shock/vibration shattering the glass encoder disk",
+      "action": "Specify IP67 sealed encoders or switch to magnetic/resolver encoders in high-shock or dirty environments",
+      "severity": 9,
+      "occurrence": 4,
+      "detection": 3
     },
     {
       "match_keywords": ["relay", "contactor", "solenoid"],
@@ -236,6 +322,17 @@
       "severity": 8,
       "occurrence": 5,
       "detection": 5
+    },
+    {
+      "match_keywords": ["label", "decal", "warning label", "sticker"],
+      "function": "Safety Communication / Identification",
+      "failure_mode": "Illegibility / Adhesive Peeling",
+      "effect": "Loss of safety warnings leading to operator hazard or regulatory compliance failure",
+      "cause": "UV degradation (fading) of ink, or application to low surface energy (LSE) plastics without proper adhesive",
+      "action": "Specify UV-resistant overlaminate and high-tack acrylic adhesives for LSE plastics like Polypropylene",
+      "severity": 6,
+      "occurrence": 5,
+      "detection": 2
     }
   ]
 }
