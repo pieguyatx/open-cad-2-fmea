@@ -1,4 +1,6 @@
+import json
 import math
+import os
 
 class GeometryPhysicsAnalyzer:
     """
@@ -32,11 +34,11 @@ class GeometryPhysicsAnalyzer:
         for comp in self.components:
             mass = comp.get("mass", 0.0)
             dims = comp.get("dimensions", {"x": 1.0, "y": 1.0, "z": 1.0})
-            
+            # Check if part weighs over 500g
             if mass > 0.5:
                 max_dim = max(dims["x"], dims["y"], dims["z"])
                 min_dim = min(dims["x"], dims["y"], dims["z"])
-                
+                 # Check if length is 5x greater than thickness (slender overhang)
                 if max_dim / (min_dim + 1e-6) > 5.0:
                     self.physics_warnings.append({
                         "component": comp["name"],

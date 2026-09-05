@@ -25,6 +25,9 @@ class FmeaGuiApp:
         self.selected_file = ""
         self.fmea_records = []
 
+        # --- ARCHITECTURE NOTE: UI LAYOUT ---
+        # We use Tkinter because it is built into Python natively. No extra installations.
+        # The layout is split into a Control Frame (top), Table Frame (middle), Export Frame (bottom).
         # Top Control Bar (File selection & AI toggle)
         control_frame = ttk.Frame(root, padding=10)
         control_frame.pack(fill=tk.X)
