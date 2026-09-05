@@ -74,10 +74,13 @@ class FreeCADAssemblyExtractorWin:
 
                     mass = 0.0
                     dimensions = {"x": 1.0, "y": 1.0, "z": 1.0}
+                    shape_obj = None
 
-                    # Read 3D shape data to compute bounding sizes and weight estimates
+                    # Read 3D shape data to compute bounding sizes, weight estimates, and clash checks
                     if hasattr(obj, "Shape") and obj.Shape and not obj.Shape.isNull():
                         shape = obj.Shape
+                        shape_obj = shape  # <-- Stored so geometry_analyzer.py can check for spatial clashes
+                        
                         bbox = shape.BoundBox
                         dimensions = {
                             "x": max(bbox.XLength, 0.1),
@@ -108,7 +111,8 @@ class FreeCADAssemblyExtractorWin:
                         "type": obj.TypeId,
                         "material": mat_name,
                         "mass": mass,
-                        "dimensions": dimensions
+                        "dimensions": dimensions,
+                        "shape_object": shape_obj  # <-- Passed to geometry analyzer
                     })
 
                 # Grab assembly joint constraint definitions
@@ -135,10 +139,6 @@ class LocalLLMReasonerWin:
         self.endpoint = endpoint
 
     def _clean_json_response(self, raw_text):
-        """
-        LLMs often wrap JSON inside conversational text or markdown blocks (```json ... ```).
-        This function strips out everything except the actual JSON brackets so the script doesn't crash.
-        """
         raw_text = raw_text.strip()
         match = re.search(r"\[\s*\{.*\}\s*\]", raw_text, re.DOTALL)
         if match:
@@ -146,7 +146,6 @@ class LocalLLMReasonerWin:
         return raw_text
 
     def infer_failure_modes(self, cad_context):
-        """Sends extracted CAD data to Ollama to ask for extra engineering insights."""
         prompt = f"""
 You are an expert Reliability, 3D Printing, and DFMEA Engineer.
 Analyze the following CAD assembly context (Components, Materials, Joints, Print Warnings) and deduce functional failure modes.

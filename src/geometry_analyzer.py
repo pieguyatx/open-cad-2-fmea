@@ -3,10 +3,10 @@ import math
 class GeometryPhysicsAnalyzer:
     """
     GEOMETRY & PHYSICS ANALYZER EXPLAINED:
-    Instead of asking an AI to guess if a part might break, this module uses pure 
-    mathematical rules based on standard mechanical engineering principles. 
-    It looks at the physical dimensions, weight, and assembly joints extracted 
-    from your CAD file to catch common physical design oversights automatically.
+    Instead of guessing, this module uses pure mathematical rules based on standard 
+    mechanical engineering principles. It analyzes the physical dimensions, weight, 
+    assembly joints, and exact 3D shapes extracted from your CAD file to catch 
+    common physical design oversights automatically.
     """
     def __init__(self, cad_context):
         self.components = cad_context.get("components", [])
@@ -14,10 +14,11 @@ class GeometryPhysicsAnalyzer:
         self.physics_warnings = []
 
     def analyze_assembly_physics(self):
-        """Runs all deterministic physical checks and returns a list of FMEA warnings."""
+        """Runs all deterministic physical and geometric checks and returns a list of FMEA warnings."""
         self._check_cantilever_and_mass()
         self._check_metal_on_metal_rotation()
         self._check_thermal_expansion_mismatches()
+        self._check_geometric_interferences()
         return self.physics_warnings
 
     def _check_cantilever_and_mass(self):
@@ -32,12 +33,10 @@ class GeometryPhysicsAnalyzer:
             mass = comp.get("mass", 0.0)
             dims = comp.get("dimensions", {"x": 1.0, "y": 1.0, "z": 1.0})
             
-            # Check if part weighs over 500g
             if mass > 0.5:
                 max_dim = max(dims["x"], dims["y"], dims["z"])
                 min_dim = min(dims["x"], dims["y"], dims["z"])
                 
-                # Check if length is 5x greater than thickness (slender overhang)
                 if max_dim / (min_dim + 1e-6) > 5.0:
                     self.physics_warnings.append({
                         "component": comp["name"],
@@ -54,9 +53,8 @@ class GeometryPhysicsAnalyzer:
         """
         RULE 2: Unlubricated Metal-on-Metal Rotation
         If the assembly has a rotating or concentric joint between two metal parts 
-        (like a steel shaft inside a steel housing) and no bearing, bushing, or 
-        plastic liner is mentioned in the component names, it flags an unlubricated 
-        metal-on-metal friction risk that will instantly seize or gall.
+        and no bearing, bushing, or plastic liner is mentioned in the component names, 
+        it flags an unlubricated metal-on-metal friction risk that will instantly seize or gall.
         """
         for joint in self.joints:
             j_type = joint.get("type", "").lower()
@@ -68,7 +66,6 @@ class GeometryPhysicsAnalyzer:
                 
                 for obj_name in linked:
                     name_lower = obj_name.lower()
-                    # Check if a bearing or soft bushing is present to prevent galling
                     if any(b in name_lower for b in ["bearing", "bush", "bushing", "ptfe", "brass", "nylon"]):
                         has_bearing = True
                     if any(m in name_lower for m in ["steel", "aluminum", "iron", "metal", "titanium"]):
@@ -91,8 +88,7 @@ class GeometryPhysicsAnalyzer:
         RULE 3: Thermal Expansion Mismatch in Rigid Joints
         Different materials expand at different rates when temperatures change. 
         If an Aluminum part is rigidly bolted directly to a Steel part, thermal 
-        cycles will cause the parts to fight each other, shearing bolts or warping 
-        the frame.
+        cycles will cause the parts to fight each other, shearing bolts or warping the frame.
         """
         for joint in self.joints:
             j_type = joint.get("type", "").lower()
@@ -118,3 +114,49 @@ class GeometryPhysicsAnalyzer:
                         "rpn": 7 * 4 * 5,
                         "action": "Slot the mounting holes to allow thermal sliding clearance, or match the material profiles."
                     })
+
+    def _check_geometric_interferences(self):
+        """
+        RULE 4: 3D Spatial Interference (Clash Detection)
+        MANUFACTURING & TOLERANCE INSIGHT:
+        While STEP files don't store tolerance bands, we *can* reliably detect when 
+        two solid parts physically occupy the same space (an interference clash). 
+        To keep things fast and prevent computer freezing, we first check if their 
+        bounding boxes overlap. If they do, we ask FreeCAD's geometry engine if 
+        their actual 3D shapes intersect.
+        """
+        comps = [c for c in self.components if "shape_object" in c and c["shape_object"] is not None]
+        
+        # Compare every unique pair of parts in the assembly
+        for i in range(len(comps)):
+            for j in range(i + 1, len(comps)):
+                c1 = comps[i]
+                c2 = comps[j]
+                
+                shape1 = c1["shape_object"]
+                shape2 = c2["shape_object"]
+                
+                try:
+                    # Step 1: Quick bounding box check (saves processing time)
+                    box1 = shape1.BoundBox
+                    box2 = shape2.BoundBox
+                    
+                    if box1.intersect(box2):
+                        # Step 2: Precise mathematical intersection check
+                        intersection = shape1.common(shape2)
+                        
+                        # If the volume of the intersection is greater than zero, they are clashing!
+                        if intersection and not intersection.isNull() and intersection.Volume > 0.01:
+                            self.physics_warnings.append({
+                                "component": f"{c1['name']} vs {c2['name']}",
+                                "function": "Physical Clearance / Spatial Separation",
+                                "failure_mode": "Assembly Interference / Geometric Clash",
+                                "effect": "Parts cannot be physically assembled together, or will crush/deform each other during installation.",
+                                "cause": f"Spatial overlap of {intersection.Volume:.1f} mm³ detected between nominal CAD geometries.",
+                                "severity": 9, "occurrence": 5, "detection": 3,
+                                "rpn": 9 * 5 * 3,
+                                "action": "Modify CAD geometry to introduce a minimum operational clearance gap (e.g., 0.5mm clearance)."
+                            })
+                except Exception:
+                    # Gracefully skip if shape geometry queries encounter unsupported edge cases
+                    continue
