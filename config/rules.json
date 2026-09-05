@@ -1,0 +1,37 @@
+{
+  "materials": [
+    {
+      "match_keywords": ["pla", "petg", "abs", "tpu"],
+      "failure_mode": "Inter-Layer Shear Delamination (Z-Axis)",
+      "effect": "Part snaps under bending or impact load along layer lines",
+      "cause": "Anisotropic FDM layer bonding weak along Z-axis print direction",
+      "action": "Reorient print angle by 45-90 deg or increase wall perimeter loops",
+      "severity": 7,
+      "occurrence": 6,
+      "detection": 3
+    },
+    {
+      "match_keywords": ["steel", "iron"],
+      "failure_mode": "Atmospheric Surface Oxidation",
+      "effect": "Corrosion thin-out and localized stress concentration",
+      "cause": "Uncoated carbon steel exposed to ambient humidity",
+      "action": "Specify protective plating, powder coat, or passivated 316SS",
+      "severity": 6,
+      "occurrence": 5,
+      "detection": 2
+    }
+  ],
+  "components": [
+    {
+      "match_keywords": ["bolt", "screw", "fastener", "heat_insert"],
+      "function": "Clamping Joint Preload Retention",
+      "failure_mode": "Thread Stripping / Plastic Wall Creep",
+      "effect": "Loss of joint clamp load and physical attachment failure",
+      "cause": "Over-torquing in raw 3D printed holes without brass heat-set inserts",
+      "action": "Incorporate brass heat-set inserts (M3/M4) into 3D printed bosses",
+      "severity": 8,
+      "occurrence": 7,
+      "detection": 4
+    }
+  ]
+}
