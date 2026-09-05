@@ -5,10 +5,11 @@ import json
 import urllib.request
 import urllib.error
 
-# --- ARCHITECTURE NOTE: FREE CAD PYTHON INTEGRATION ---
-# FreeCAD installs its own embedded version of Python and specific DLL files.
-# To allow a standard Windows Python installation to talk to FreeCAD, we must manually
-# inject FreeCAD's 'bin' and 'lib' folders into our system path BEFORE importing FreeCAD.
+# --- ENVIRONMENT SETUP EXPLAINED ---
+# FreeCAD comes with its own private Python environment and C++ libraries. 
+# Because this script runs using your standard Windows Python installation, 
+# we must manually locate FreeCAD's folder on your hard drive and add its 
+# 'bin' and 'lib' folders to Python's search path so it knows how to read CAD files.
 WIN_FREECAD_BASE_PATHS = [
     r"C:\Program Files\FreeCAD 0.21",
     r"C:\Program Files\FreeCAD 1.0",
@@ -28,7 +29,6 @@ try:
     import FreeCAD
     import Part
 except ImportError:
-    # We pass here because the PowerShell wrapper scripts handle execution environment warnings
     pass
 
 
@@ -37,6 +37,7 @@ class FreeCADAssemblyExtractorWin:
         pass
 
     def extract_context(self, file_path):
+        """Opens a CAD assembly file (.FCStd or .STEP) and reads its parts and joints."""
         file_path = os.path.abspath(file_path)
         if not os.path.exists(file_path):
             raise FileNotFoundError(f"CAD File not found: {file_path}")
@@ -51,7 +52,8 @@ class FreeCADAssemblyExtractorWin:
 
         doc = None
         try:
-            # We handle STEP files by creating a dummy document and importing the geometry into it
+            # STEP files are universal text formats. FreeCAD reads them by 
+            # creating a temporary blank project and inserting the geometry into it.
             if ext in [".step", ".stp"]:
                 doc = FreeCAD.newDocument("STEP_Import")
                 try:
@@ -70,12 +72,28 @@ class FreeCADAssemblyExtractorWin:
                     elif "mat:" in obj.Label.lower():
                         mat_name = obj.Label
 
-                    # --- ARCHITECTURE NOTE: GEOMETRY CHECKING ---
-                    # To detect 3D print failures, we check the actual surface area of the model's faces.
-                    # Bounding boxes can be misleading for angled parts. Here we flag micro-faces 
-                    # that are too small for a standard 0.4mm 3D printer nozzle to resolve.
+                    mass = 0.0
+                    dimensions = {"x": 1.0, "y": 1.0, "z": 1.0}
+
+                    # Read 3D shape data to compute bounding sizes and weight estimates
                     if hasattr(obj, "Shape") and obj.Shape and not obj.Shape.isNull():
                         shape = obj.Shape
+                        bbox = shape.BoundBox
+                        dimensions = {
+                            "x": max(bbox.XLength, 0.1),
+                            "y": max(bbox.YLength, 0.1),
+                            "z": max(bbox.ZLength, 0.1)
+                        }
+                        
+                        try:
+                            volume_mm3 = shape.Volume
+                            density_g_mm3 = 0.00785  # Generic baseline steel/aluminum density (~7.85 g/cm3)
+                            mass = (volume_mm3 * density_g_mm3) / 1000.0  # Converted to kg
+                        except Exception:
+                            mass = 0.1
+
+                        # 3D Printing check: look for microscopic faces smaller than 1mm^2 
+                        # that often cause FDM 3D printer slicers to fail or leave gaps.
                         for face in shape.Faces:
                             if 0.0 < face.Area < 1.0: 
                                 context["print_warnings"].append({
@@ -88,9 +106,12 @@ class FreeCADAssemblyExtractorWin:
                     context["components"].append({
                         "name": obj.Label,
                         "type": obj.TypeId,
-                        "material": mat_name
+                        "material": mat_name,
+                        "mass": mass,
+                        "dimensions": dimensions
                     })
 
+                # Grab assembly joint constraint definitions
                 if any(k in obj.TypeId for k in ["Joint", "Constraint", "Element"]):
                     context["joints"].append({
                         "name": obj.Label,
@@ -98,7 +119,7 @@ class FreeCADAssemblyExtractorWin:
                         "linked_objects": [e for e in getattr(obj, "Elements", [])]
                     })
         finally:
-            # ALWAYS close the document to prevent memory leaks in background processes
+            # Clean up memory by closing the document when finished
             if doc is not None:
                 try:
                     FreeCAD.closeDocument(doc.Name)
@@ -115,10 +136,8 @@ class LocalLLMReasonerWin:
 
     def _clean_json_response(self, raw_text):
         """
-        SECURITY & ROBUSTNESS NOTE: 
-        LLMs often 'hallucinate' conversational text (e.g. "Here is your JSON:") 
-        or wrap data in markdown code blocks like ```json ... ```.
-        This regex targets the raw brackets to prevent json.loads() from crashing.
+        LLMs often wrap JSON inside conversational text or markdown blocks (```json ... ```).
+        This function strips out everything except the actual JSON brackets so the script doesn't crash.
         """
         raw_text = raw_text.strip()
         match = re.search(r"\[\s*\{.*\}\s*\]", raw_text, re.DOTALL)
@@ -127,6 +146,7 @@ class LocalLLMReasonerWin:
         return raw_text
 
     def infer_failure_modes(self, cad_context):
+        """Sends extracted CAD data to Ollama to ask for extra engineering insights."""
         prompt = f"""
 You are an expert Reliability, 3D Printing, and DFMEA Engineer.
 Analyze the following CAD assembly context (Components, Materials, Joints, Print Warnings) and deduce functional failure modes.
@@ -157,7 +177,6 @@ JSON structure per object:
         }
 
         try:
-            # Using built-in urllib to avoid requiring users to install 'requests' via pip
             req = urllib.request.Request(
                 self.endpoint,
                 data=json.dumps(payload).encode("utf-8"),

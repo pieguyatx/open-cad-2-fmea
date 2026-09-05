@@ -6,9 +6,17 @@ import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 
 from src.cad_extractor import FreeCADAssemblyExtractorWin, LocalLLMReasonerWin
+from src.geometry_analyzer import GeometryPhysicsAnalyzer
 
 
 class FmeaGuiApp:
+    """
+    USER INTERFACE EXPLAINED:
+    We use Python's built-in Tkinter library to create a lightweight desktop window. 
+    This avoids forcing you to install heavy UI frameworks. It provides a simple file browser, 
+    an optional checkbox for AI reasoning, a table view sorted by Risk Priority Number (RPN), 
+    and a button to save everything directly to an Excel-friendly CSV spreadsheet.
+    """
     def __init__(self, root):
         self.root = root
         self.root.title("Open-Source CAD Assembly DFMEA Generator")
@@ -17,9 +25,7 @@ class FmeaGuiApp:
         self.selected_file = ""
         self.fmea_records = []
 
-        # --- ARCHITECTURE NOTE: UI LAYOUT ---
-        # We use Tkinter because it is built into Python natively. No extra installations.
-        # The layout is split into a Control Frame (top), Table Frame (middle), Export Frame (bottom).
+        # Top Control Bar (File selection & AI toggle)
         control_frame = ttk.Frame(root, padding=10)
         control_frame.pack(fill=tk.X)
 
@@ -32,6 +38,7 @@ class FmeaGuiApp:
 
         ttk.Button(control_frame, text="Run DFMEA Analysis", command=self.run_analysis).pack(side=tk.RIGHT, padx=5)
 
+        # Middle Table Area (Displays the generated FMEA table rows)
         table_frame = ttk.Frame(root, padding=10)
         table_frame.pack(fill=tk.BOTH, expand=True)
 
@@ -49,11 +56,13 @@ class FmeaGuiApp:
         self.tree.configure(yscroll=scrollbar.set)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
+        # Bottom Export Bar
         bottom_frame = ttk.Frame(root, padding=10)
         bottom_frame.pack(fill=tk.X)
         ttk.Button(bottom_frame, text="Export DFMEA Report to CSV", command=self.export_csv).pack(side=tk.RIGHT)
 
     def browse_file(self):
+        """Opens a standard Windows file picker for CAD files."""
         filetypes = [("CAD Assemblies", "*.FCStd *.step *.stp"), ("All Files", "*.*")]
         path = filedialog.askopenfilename(filetypes=filetypes)
         if path:
@@ -61,11 +70,12 @@ class FmeaGuiApp:
             self.lbl_file.config(text=os.path.basename(path), font=("Segoe UI", 9, "bold"))
 
     def run_analysis(self):
+        """Orchestrates the entire extraction, rule checking, physics analysis, and UI population."""
         if not self.selected_file:
             messagebox.showwarning("Warning", "Please select a CAD file first.")
             return
 
-        # Clear existing table data before running a new analysis
+        # Clear old table records
         for item in self.tree.get_children():
             self.tree.delete(item)
         self.fmea_records.clear()
@@ -85,7 +95,7 @@ class FmeaGuiApp:
             messagebox.showerror("CAD Processing Error", f"Failed to parse CAD file:\n{e}")
             return
 
-        # 1. Process Geometry Warnings (e.g., thin features for 3D printing)
+        # 1. 3D Print Geometry Warnings
         for warn in cad_context.get("print_warnings", []):
             sev, occ, det = 7, 8, 3
             self.fmea_records.append({
@@ -95,7 +105,12 @@ class FmeaGuiApp:
                 "Action": "Increase feature wall thickness in CAD model"
             })
 
-        # 2. Process predefined component and material rules from rules.json
+        # 2. Mathematical Physics & Geometry Rules
+        geo_analyzer = GeometryPhysicsAnalyzer(cad_context)
+        for p_warn in geo_analyzer.analyze_assembly_physics():
+            self.fmea_records.append(p_warn)
+
+        # 3. Material and Component Rules from rules.json
         for comp in cad_context["components"]:
             c_name = comp["name"]
             c_mat = comp["material"].lower()
@@ -113,7 +128,7 @@ class FmeaGuiApp:
                             "Action": rule["action"]
                         })
 
-        # 3. Request LLM generated insights if the user checked the box
+        # 4. Optional Local AI Pass (Ollama)
         if self.var_ai.get():
             reasoner = LocalLLMReasonerWin()
             ai_data = reasoner.infer_failure_modes(cad_context)
@@ -131,10 +146,9 @@ class FmeaGuiApp:
                 except (ValueError, TypeError):
                     continue
 
-        # Sort Records by Risk Priority Number (RPN) Descending to highlight high-risk items at the top
+        # Sort by Risk Priority Number (RPN) highest-to-lowest so dangerous items appear at the top
         self.fmea_records.sort(key=lambda x: x["RPN"], reverse=True)
 
-        # Populate the GUI table
         for rec in self.fmea_records:
             self.tree.insert("", tk.END, values=(
                 rec["Component"], rec["Function"], rec["Failure Mode"], rec["Effect"],
@@ -144,7 +158,7 @@ class FmeaGuiApp:
         messagebox.showinfo("Success", f"Analysis complete! Found {len(self.fmea_records)} FMEA entries.")
 
     def export_csv(self):
-        """Allows user to save the FMEA table into a CSV format compatible with Excel and QMS systems."""
+        """Exports the table data into a CSV file."""
         if not self.fmea_records:
             messagebox.showwarning("Warning", "No FMEA data to export.")
             return

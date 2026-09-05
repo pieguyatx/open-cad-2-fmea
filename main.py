@@ -5,9 +5,12 @@ import csv
 import argparse
 
 from src.cad_extractor import FreeCADAssemblyExtractorWin, LocalLLMReasonerWin
+from src.geometry_analyzer import GeometryPhysicsAnalyzer
 
-# This script is the "Headless" version of gui.py. It performs the exact same logic
-# but interfaces through the command prompt instead of a window, useful for batch processing.
+# --- CLI SCRIPT EXPLAINED ---
+# This is the "headless" equivalent of gui.py. It runs identical logic 
+# but takes inputs from your terminal command prompt rather than a desktop window. 
+# This is useful if you want to automate report generation in scripts or batch folders.
 
 def run_pipeline(input_file, output_csv, config_path, use_ai=False):
     if not os.path.exists(config_path):
@@ -28,7 +31,7 @@ def run_pipeline(input_file, output_csv, config_path, use_ai=False):
 
     fmea_records = []
 
-    # Process geometrical warnings
+    # 1. 3D Print Warnings
     for warn in cad_context.get("print_warnings", []):
         sev, occ, det = 7, 8, 3
         fmea_records.append({
@@ -38,7 +41,12 @@ def run_pipeline(input_file, output_csv, config_path, use_ai=False):
             "Action": "Increase feature wall thickness in CAD model"
         })
 
-    # Process predefined material/component rules
+    # 2. Physics & Geometry Rules
+    geo_analyzer = GeometryPhysicsAnalyzer(cad_context)
+    for p_warn in geo_analyzer.analyze_assembly_physics():
+        fmea_records.append(p_warn)
+
+    # 3. Material & Component Rules
     for comp in cad_context["components"]:
         c_name = comp["name"]
         c_mat = comp["material"].lower()
@@ -56,7 +64,7 @@ def run_pipeline(input_file, output_csv, config_path, use_ai=False):
                         "Action": rule["action"]
                     })
 
-    # Process LLM AI Analysis
+    # 4. Optional AI Pass
     if use_ai:
         print("[*] Running Local LLM Functional Reasoning (Ollama)...")
         reasoner = LocalLLMReasonerWin()
@@ -75,7 +83,7 @@ def run_pipeline(input_file, output_csv, config_path, use_ai=False):
             except (ValueError, TypeError):
                 continue
 
-    # Sort high-risk items to the top
+    # Sort highest risk to the top
     fmea_records.sort(key=lambda x: x["RPN"], reverse=True)
 
     fieldnames = ["Component", "Function", "Failure Mode", "Effect", "Severity", "Occurrence", "Detection", "RPN", "Action"]
