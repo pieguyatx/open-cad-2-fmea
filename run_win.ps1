@@ -1,6 +1,7 @@
 <#
 .SYNOPSIS
-    Windows Headless Execution Wrapper for CAD Auto-DFMEA Generator
+    Windows Headless Execution Wrapper for CAD Auto-DFMEA Generator.
+    Used for terminal execution instead of the graphical interface.
 #>
 
 param (
@@ -37,4 +38,5 @@ if ($UseAI) {
     $ScriptArgs += "--ai"
 }
 
+# '&' executes the string path as a command in PowerShell
 & $FreeCADCmd $ScriptArgs

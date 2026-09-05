@@ -5,6 +5,10 @@ import json
 import urllib.request
 import urllib.error
 
+# --- ARCHITECTURE NOTE: FREE CAD PYTHON INTEGRATION ---
+# FreeCAD installs its own embedded version of Python and specific DLL files.
+# To allow a standard Windows Python installation to talk to FreeCAD, we must manually
+# inject FreeCAD's 'bin' and 'lib' folders into our system path BEFORE importing FreeCAD.
 WIN_FREECAD_BASE_PATHS = [
     r"C:\Program Files\FreeCAD 0.21",
     r"C:\Program Files\FreeCAD 1.0",
@@ -24,6 +28,7 @@ try:
     import FreeCAD
     import Part
 except ImportError:
+    # We pass here because the PowerShell wrapper scripts handle execution environment warnings
     pass
 
 
@@ -46,6 +51,7 @@ class FreeCADAssemblyExtractorWin:
 
         doc = None
         try:
+            # We handle STEP files by creating a dummy document and importing the geometry into it
             if ext in [".step", ".stp"]:
                 doc = FreeCAD.newDocument("STEP_Import")
                 try:
@@ -64,6 +70,10 @@ class FreeCADAssemblyExtractorWin:
                     elif "mat:" in obj.Label.lower():
                         mat_name = obj.Label
 
+                    # --- ARCHITECTURE NOTE: GEOMETRY CHECKING ---
+                    # To detect 3D print failures, we check the actual surface area of the model's faces.
+                    # Bounding boxes can be misleading for angled parts. Here we flag micro-faces 
+                    # that are too small for a standard 0.4mm 3D printer nozzle to resolve.
                     if hasattr(obj, "Shape") and obj.Shape and not obj.Shape.isNull():
                         shape = obj.Shape
                         for face in shape.Faces:
@@ -88,6 +98,7 @@ class FreeCADAssemblyExtractorWin:
                         "linked_objects": [e for e in getattr(obj, "Elements", [])]
                     })
         finally:
+            # ALWAYS close the document to prevent memory leaks in background processes
             if doc is not None:
                 try:
                     FreeCAD.closeDocument(doc.Name)
@@ -103,6 +114,12 @@ class LocalLLMReasonerWin:
         self.endpoint = endpoint
 
     def _clean_json_response(self, raw_text):
+        """
+        SECURITY & ROBUSTNESS NOTE: 
+        LLMs often 'hallucinate' conversational text (e.g. "Here is your JSON:") 
+        or wrap data in markdown code blocks like ```json ... ```.
+        This regex targets the raw brackets to prevent json.loads() from crashing.
+        """
         raw_text = raw_text.strip()
         match = re.search(r"\[\s*\{.*\}\s*\]", raw_text, re.DOTALL)
         if match:
@@ -140,6 +157,7 @@ JSON structure per object:
         }
 
         try:
+            # Using built-in urllib to avoid requiring users to install 'requests' via pip
             req = urllib.request.Request(
                 self.endpoint,
                 data=json.dumps(payload).encode("utf-8"),

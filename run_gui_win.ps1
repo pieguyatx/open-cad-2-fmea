@@ -1,6 +1,12 @@
 <#
 .SYNOPSIS
     Launches the Open-Source FMEA Generator GUI on Windows.
+    
+    ARCHITECTURE NOTE:
+    This wrapper script ensures Windows can find the FreeCAD background files.
+    Running `python gui.py` directly usually fails because Python doesn't know 
+    where FreeCAD's C++ DLLs are located. This script temporarily adds them 
+    to the system environment variables before launching.
 #>
 
 $FreeCADPaths = @(
@@ -23,6 +29,7 @@ if (-not $FreeCADBase) {
     exit 1
 }
 
+# Attach paths so the script can resolve underlying FreeCAD dependencies 
 $env:PATH = "$FreeCADBase\bin;$FreeCADBase\lib;" + $env:PATH
 $env:PYTHONPATH = "$FreeCADBase\bin;$FreeCADBase\lib"
 

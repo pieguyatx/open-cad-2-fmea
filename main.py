@@ -6,6 +6,9 @@ import argparse
 
 from src.cad_extractor import FreeCADAssemblyExtractorWin, LocalLLMReasonerWin
 
+# This script is the "Headless" version of gui.py. It performs the exact same logic
+# but interfaces through the command prompt instead of a window, useful for batch processing.
+
 def run_pipeline(input_file, output_csv, config_path, use_ai=False):
     if not os.path.exists(config_path):
         print(f"[Error] Missing config file at {config_path}")
@@ -25,6 +28,7 @@ def run_pipeline(input_file, output_csv, config_path, use_ai=False):
 
     fmea_records = []
 
+    # Process geometrical warnings
     for warn in cad_context.get("print_warnings", []):
         sev, occ, det = 7, 8, 3
         fmea_records.append({
@@ -34,6 +38,7 @@ def run_pipeline(input_file, output_csv, config_path, use_ai=False):
             "Action": "Increase feature wall thickness in CAD model"
         })
 
+    # Process predefined material/component rules
     for comp in cad_context["components"]:
         c_name = comp["name"]
         c_mat = comp["material"].lower()
@@ -51,6 +56,7 @@ def run_pipeline(input_file, output_csv, config_path, use_ai=False):
                         "Action": rule["action"]
                     })
 
+    # Process LLM AI Analysis
     if use_ai:
         print("[*] Running Local LLM Functional Reasoning (Ollama)...")
         reasoner = LocalLLMReasonerWin()
@@ -69,6 +75,7 @@ def run_pipeline(input_file, output_csv, config_path, use_ai=False):
             except (ValueError, TypeError):
                 continue
 
+    # Sort high-risk items to the top
     fmea_records.sort(key=lambda x: x["RPN"], reverse=True)
 
     fieldnames = ["Component", "Function", "Failure Mode", "Effect", "Severity", "Occurrence", "Detection", "RPN", "Action"]

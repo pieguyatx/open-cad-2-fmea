@@ -17,6 +17,9 @@ class FmeaGuiApp:
         self.selected_file = ""
         self.fmea_records = []
 
+        # --- ARCHITECTURE NOTE: UI LAYOUT ---
+        # We use Tkinter because it is built into Python natively. No extra installations.
+        # The layout is split into a Control Frame (top), Table Frame (middle), Export Frame (bottom).
         control_frame = ttk.Frame(root, padding=10)
         control_frame.pack(fill=tk.X)
 
@@ -62,6 +65,7 @@ class FmeaGuiApp:
             messagebox.showwarning("Warning", "Please select a CAD file first.")
             return
 
+        # Clear existing table data before running a new analysis
         for item in self.tree.get_children():
             self.tree.delete(item)
         self.fmea_records.clear()
@@ -81,6 +85,7 @@ class FmeaGuiApp:
             messagebox.showerror("CAD Processing Error", f"Failed to parse CAD file:\n{e}")
             return
 
+        # 1. Process Geometry Warnings (e.g., thin features for 3D printing)
         for warn in cad_context.get("print_warnings", []):
             sev, occ, det = 7, 8, 3
             self.fmea_records.append({
@@ -90,6 +95,7 @@ class FmeaGuiApp:
                 "Action": "Increase feature wall thickness in CAD model"
             })
 
+        # 2. Process predefined component and material rules from rules.json
         for comp in cad_context["components"]:
             c_name = comp["name"]
             c_mat = comp["material"].lower()
@@ -107,6 +113,7 @@ class FmeaGuiApp:
                             "Action": rule["action"]
                         })
 
+        # 3. Request LLM generated insights if the user checked the box
         if self.var_ai.get():
             reasoner = LocalLLMReasonerWin()
             ai_data = reasoner.infer_failure_modes(cad_context)
@@ -124,8 +131,10 @@ class FmeaGuiApp:
                 except (ValueError, TypeError):
                     continue
 
+        # Sort Records by Risk Priority Number (RPN) Descending to highlight high-risk items at the top
         self.fmea_records.sort(key=lambda x: x["RPN"], reverse=True)
 
+        # Populate the GUI table
         for rec in self.fmea_records:
             self.tree.insert("", tk.END, values=(
                 rec["Component"], rec["Function"], rec["Failure Mode"], rec["Effect"],
@@ -135,6 +144,7 @@ class FmeaGuiApp:
         messagebox.showinfo("Success", f"Analysis complete! Found {len(self.fmea_records)} FMEA entries.")
 
     def export_csv(self):
+        """Allows user to save the FMEA table into a CSV format compatible with Excel and QMS systems."""
         if not self.fmea_records:
             messagebox.showwarning("Warning", "No FMEA data to export.")
             return
