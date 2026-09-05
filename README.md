@@ -89,7 +89,7 @@ Run batch processing or integrate into automated toolchains without a GUI:
 
 ## Customizing for Your Company / Hobby
 
-You can add your own failure rules by editing config/rules.json. For example, if you frequently use a specific type of bearing, screw, or 3D printer filament (like ASA or Nylon), add it to the JSON file to automatically flag known failure modes associated with those materials every time they appear in an assembly.
+You can add your own failure rules by editing `config/rules.json`. For example, if you frequently use a specific type of bearing, screw, or 3D printer filament (like ASA or Nylon), add it to the JSON file to automatically flag known failure modes associated with those materials every time they appear in an assembly.
 
 ## License
 

@@ -11,14 +11,64 @@
       "detection": 3
     },
     {
-      "match_keywords": ["steel", "iron"],
-      "failure_mode": "Atmospheric Surface Oxidation",
+      "match_keywords": ["steel", "iron", "1018", "a36"],
+      "failure_mode": "Atmospheric Surface Oxidation (Rust)",
       "effect": "Corrosion thin-out and localized stress concentration",
-      "cause": "Uncoated carbon steel exposed to ambient humidity",
-      "action": "Specify protective plating, powder coat, or passivated 316SS",
+      "cause": "Uncoated carbon steel exposed to ambient humidity/moisture",
+      "action": "Specify protective plating (zinc), powder coat, or switch to 304/316SS",
       "severity": 6,
-      "occurrence": 5,
+      "occurrence": 7,
       "detection": 2
+    },
+    {
+      "match_keywords": ["delrin", "pom", "acetal", "polyacetal"],
+      "failure_mode": "Viscoelastic Creep / Stress Relaxation",
+      "effect": "Loss of joint clamping force, hinge loosening, or dimensional drift",
+      "cause": "Continuous compressive loads over time, severely accelerated by operating temperatures above 60°C (140°F)",
+      "action": "Implement metal compression limiters (sleeves) in bolted joints or utilize Belleville spring washers to maintain tension",
+      "severity": 6,
+      "occurrence": 8,
+      "detection": 4
+    },
+    {
+      "match_keywords": ["stainless", "304", "316", "titanium", "ti-6al-4v"],
+      "failure_mode": "Thread Galling (Cold Welding)",
+      "effect": "Fastener permanently seizes during installation or maintenance, requiring destructive removal",
+      "cause": "Friction-induced localized heat destroying the passive oxide layer during threaded engagement",
+      "action": "Apply anti-seize compound (molybdenum disulfide), use rolled threads instead of cut, or mix alloy grades (e.g., 304 nut on 316 bolt)",
+      "severity": 7,
+      "occurrence": 6,
+      "detection": 4
+    },
+    {
+      "match_keywords": ["acrylic", "polycarbonate", "pmma", "plexiglass"],
+      "failure_mode": "Environmental Stress Cracking",
+      "effect": "Optical crazing (fogging) and rapid brittle fracture propagation",
+      "cause": "Chemical attack from anaerobic threadlockers (Loctite), alcohol, or high installation torque",
+      "action": "Ban chemical threadlockers near part; specify thread-forming screws designed for plastics (PT screws)",
+      "severity": 8,
+      "occurrence": 6,
+      "detection": 4
+    },
+    {
+      "match_keywords": ["nylon", "pa6", "pa66", "polyamide"],
+      "failure_mode": "Hygroscopic Dimensional Swelling",
+      "effect": "Loss of dimensional tolerance and up to 30% reduction in tensile strength",
+      "cause": "Absorption of atmospheric moisture over time",
+      "action": "Design with looser tolerances or switch to moisture-resistant POM (Delrin)",
+      "severity": 5,
+      "occurrence": 8,
+      "detection": 3
+    },
+    {
+      "match_keywords": ["rubber", "silicone", "buna", "nitrile", "epdm", "neoprene"],
+      "failure_mode": "Elastomer Degradation (Embrittlement)",
+      "effect": "Cracking, loss of elasticity, and sealing failure",
+      "cause": "UV/Ozone exposure or thermal cycling driving out plasticizers",
+      "action": "Verify specific elastomer compatibility with operating environment (e.g., EPDM for UV)",
+      "severity": 7,
+      "occurrence": 5,
+      "detection": 6
     }
   ],
   "components": [
@@ -27,11 +77,99 @@
       "function": "Clamping Joint Preload Retention",
       "failure_mode": "Thread Stripping / Plastic Wall Creep",
       "effect": "Loss of joint clamp load and physical attachment failure",
-      "cause": "Over-torquing in raw 3D printed holes without brass heat-set inserts",
+      "cause": "Over-torquing in raw plastic/3D printed holes without brass inserts",
       "action": "Incorporate brass heat-set inserts (M3/M4) into 3D printed bosses",
       "severity": 8,
       "occurrence": 7,
       "detection": 4
+    },
+    {
+      "match_keywords": ["flat head", "countersunk", "fhcs", "csk"],
+      "function": "Flush Surface Clamping",
+      "failure_mode": "Radial Hoop Stress Fracture",
+      "effect": "Splitting or radial bursting of the mating component",
+      "cause": "Wedge geometry of the screw head driving extreme outward radial forces into the material (highly lethal to plastics/composites)",
+      "action": "Switch to pan head, socket head, or button head screws with flat washers to distribute load parallel to the axis",
+      "severity": 8,
+      "occurrence": 7,
+      "detection": 5
+    },
+    {
+      "match_keywords": ["nyloc", "nylon nut", "lock nut", "locknut"],
+      "function": "Vibration Resistant Fastening",
+      "failure_mode": "Loss of Prevailing Torque",
+      "effect": "Vibrational self-loosening and subsequent joint failure",
+      "cause": "Re-use of the nut causing permanent plastic deformation and wear of the nylon collar",
+      "action": "Add explicit assembly note: 'Do not reuse Nyloc nuts after initial installation', or specify deformed-thread all-metal locknuts",
+      "severity": 8,
+      "occurrence": 6,
+      "detection": 2
+    },
+    {
+      "match_keywords": ["o-ring", "oring", "seal", "gasket"],
+      "function": "Fluid / Environmental Barrier",
+      "failure_mode": "Compression Set / Extrusion",
+      "effect": "Loss of sealing pressure resulting in fluid or pressure leak",
+      "cause": "Thermal degradation of elastomer or gap clearance too large for operating pressure",
+      "action": "Verify gland fill percentage (typically 70-85%) and specify backup rings if >1500psi",
+      "severity": 9,
+      "occurrence": 5,
+      "detection": 6
+    },
+    {
+      "match_keywords": ["bearing", "bushing", "roller"],
+      "function": "Friction Reduction / Load Support",
+      "failure_mode": "Rolling Contact Fatigue (Spalling) / Galling",
+      "effect": "Increased friction, acoustic noise, vibration, and kinematic seizure",
+      "cause": "Lubrication starvation, particle contamination, or exceeding dynamic load rating",
+      "action": "Specify sealed bearings (RS/ZZ) or schedule lubrication PMs",
+      "severity": 8,
+      "occurrence": 4,
+      "detection": 5
+    },
+    {
+      "match_keywords": ["gear", "pinion", "sprocket"],
+      "function": "Torque / Speed Transmission",
+      "failure_mode": "Tooth Root Bending Fatigue / Abrasive Wear",
+      "effect": "Backlash increase, skipped teeth, or catastrophic transmission loss",
+      "cause": "Cyclic overload, misalignment, or inadequate surface hardness",
+      "action": "Specify case hardening (carburizing/nitriding) for gear teeth",
+      "severity": 9,
+      "occurrence": 3,
+      "detection": 4
+    },
+    {
+      "match_keywords": ["spring", "compression_spring", "extension_spring"],
+      "function": "Energy Storage / Return Force",
+      "failure_mode": "Load Relaxation / Fatigue Fracture",
+      "effect": "Loss of return force preventing mechanism reset",
+      "cause": "Operating stresses exceeding torsional yield or cyclic fatigue limit",
+      "action": "Shot peen springs for high-cycle applications; ensure design stays below 45% tensile strength",
+      "severity": 7,
+      "occurrence": 4,
+      "detection": 5
+    },
+    {
+      "match_keywords": ["capacitor", "electrolytic", "e-cap"],
+      "function": "Voltage Smoothing / Energy Storage",
+      "failure_mode": "Electrolyte Vaporization / Dry-out",
+      "effect": "Increased Equivalent Series Resistance (ESR), voltage ripple, and thermal runaway circuit failure",
+      "cause": "Sustained operation at elevated ambient temperatures (component lifespan halves for every 10°C increase per the Arrhenius equation)",
+      "action": "Derate operating temperature spec by 20°C, ensure PCB airflow, or switch to solid polymer/tantalum capacitors",
+      "severity": 8,
+      "occurrence": 5,
+      "detection": 7
+    },
+    {
+      "match_keywords": ["connector", "jst", "molex", "header", "terminal"],
+      "function": "Electrical Power / Signal Transmission",
+      "failure_mode": "Fretting Corrosion",
+      "effect": "Exponential increase in contact resistance resulting in localized housing melt/fire",
+      "cause": "Mechanical micro-vibrations wearing away the tin/gold plating, exposing the base copper alloy to oxidation",
+      "action": "Apply dielectric grease, specify higher micron plating thickness, and secure wiring harnesses with strain relief within 50mm of the connector",
+      "severity": 9,
+      "occurrence": 6,
+      "detection": 5
     }
   ]
 }
