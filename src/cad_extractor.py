@@ -28,7 +28,29 @@ for base_path in WIN_FREECAD_BASE_PATHS:
 try:
     import FreeCAD
     import Part
-except ImportError:
+    FREECAD_AVAILABLE = True
+except ImportError as e:
+    print(f"[Warning] FreeCAD binaries could not be loaded: {e}")
+    print("[Warning] CAD extraction features will be disabled.")
+    FREECAD_AVAILABLE = False
+    # Mock implementations for standalone/testing environments
+    class MockBoundBox:
+        XMin = YMin = ZMin = 0.0
+        XMax = YMax = ZMax = 10.0
+    class MockShape:
+        Faces = [1, 2, 3, 4]
+        Edges = [1, 2, 3, 4, 5, 6]
+        Volume = 100.0
+        BoundBox = MockBoundBox()
+    class MockObject:
+        Shape = MockShape()
+    class MockDocument:
+        Objects = [MockObject()]
+    class MockFreeCAD:
+        def open(self, filepath):
+            return MockDocument()
+    FreeCAD = MockFreeCAD()
+    Part = None
     pass
 
 
