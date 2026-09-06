@@ -139,13 +139,13 @@ class FreeCADAssemblyExtractorWin:
                         "type": str(getattr(obj, "JointType", "Assembly Constraint")),
                         "linked_objects": [e for e in getattr(obj, "Elements", [])]
                     })
-        finally:
-            # Clean up memory by closing the document when finished
-            if doc is not None:
-                try:
-                    FreeCAD.closeDocument(doc.Name)
-                except Exception:
-                    pass
+        # finally:
+        #     # Clean up memory by closing the document when finished
+        #     if doc is not None:
+        #         try:
+        #             FreeCAD.closeDocument(doc.Name)
+        #         except Exception:
+        #             pass
 
         return context
 
