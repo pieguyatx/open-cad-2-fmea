@@ -1,4 +1,6 @@
 {
+  "cantilever_mass_kg": 0.5,
+  "cantilever_ratio": 5.0,
   "materials": [
     {
       "match_keywords": ["pla", "petg", "abs", "tpu"],
