@@ -18,11 +18,13 @@ import urllib.error
 # Because this script runs using your standard Windows Python installation, 
 # we must manually locate FreeCAD's folder on your hard drive and add its 
 # 'bin' and 'lib' folders to Python's search path so it knows how to read CAD files.
+# Customize the paths to check here for your installation of FreeCAD
 WIN_FREECAD_BASE_PATHS = [
     r"C:\Program Files\FreeCAD 0.21",
     r"C:\Program Files\FreeCAD 1.0",
     r"C:\Program Files\FreeCAD",
-    os.path.join(os.environ.get("LOCALAPPDATA", ""), r"Programs\FreeCAD")
+    os.path.join(os.environ.get("LOCALAPPDATA", ""), r"Programs\FreeCAD"),
+    os.path.join(os.environ.get("LOCALAPPDATA", ""), r"Programs\FreeCAD 1.1")
 ]
 
 for base_path in WIN_FREECAD_BASE_PATHS:
@@ -139,13 +141,14 @@ class FreeCADAssemblyExtractorWin:
                         "type": str(getattr(obj, "JointType", "Assembly Constraint")),
                         "linked_objects": [e for e in getattr(obj, "Elements", [])]
                     })
-        # finally:
+        finally:
         #     # Clean up memory by closing the document when finished
         #     if doc is not None:
         #         try:
         #             FreeCAD.closeDocument(doc.Name)
         #         except Exception:
         #             pass
+            pass # leave document open
 
         return context
 

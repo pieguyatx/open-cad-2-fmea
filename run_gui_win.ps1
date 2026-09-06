@@ -9,11 +9,13 @@
     to the system environment variables before launching.
 #>
 
+# Customize the paths to check here for your installation of FreeCAD
 $FreeCADPaths = @(
     "C:\Program Files\FreeCAD 0.21",
     "C:\Program Files\FreeCAD 1.0",
     "C:\Program Files\FreeCAD",
-    "$env:LOCALAPPDATA\Programs\FreeCAD"
+    "$env:LOCALAPPDATA\Programs\FreeCAD",
+    "$env:LOCALAPPDATA\Programs\FreeCAD 1.1"
 )
 
 $FreeCADBase = $null

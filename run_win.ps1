@@ -17,6 +17,7 @@ $FreeCADPaths = @(
     "C:\Program Files\FreeCAD 1.0\bin\freecadcmd.exe",
     "C:\Program Files\FreeCAD\bin\freecadcmd.exe",
     "$env:LOCALAPPDATA\Programs\FreeCAD\bin\freecadcmd.exe"
+    "$env:LOCALAPPDATA\Programs\FreeCAD 1.1\bin\freecadcmd.exe"
 )
 
 $FreeCADCmd = $null
