@@ -10,10 +10,29 @@ class GeometryPhysicsAnalyzer:
     assembly joints, and exact 3D shapes extracted from your CAD file to catch 
     common physical design oversights automatically.
     """
-    def __init__(self, cad_context):
+    def __init__(self, cad_context, rules_path=None):
         self.components = cad_context.get("components", [])
         self.joints = cad_context.get("joints", [])
         self.physics_warnings = []
+
+        # Prevent hardcoded relative paths by resolving absolute directory paths
+        if rules_path is None:
+            base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            rules_path = os.path.join(base_dir, "config", "rules.json")
+            
+        self.rules = self._load_rules(rules_path)
+
+    def _load_rules(self, path):
+        """Loads optional override rules from JSON to customize thresholds."""
+        if not os.path.exists(path):
+            return {}
+            
+        try:
+            with open(path, "r") as f:
+                return json.load(f)
+        except json.JSONDecodeError as e:
+            # Raise explicit ValueErrors for silent JSON parsing failures
+            raise ValueError(f"Syntax error in rules.json. Please check formatting: {e}")
 
     def analyze_assembly_physics(self):
         """Runs all deterministic physical and geometric checks and returns a list of FMEA warnings."""
@@ -31,11 +50,16 @@ class GeometryPhysicsAnalyzer:
         moment on its mounting screws. This rule catches parts likely to snap 
         their fasteners under vibration or weight.
         """
+        # Apply JSON rule overrides if they exist, otherwise default to 0.5kg and 5.0 ratio
+        mass_limit = self.rules.get("cantilever_mass_kg", 0.5)
+        ratio_limit = self.rules.get("cantilever_ratio", 5.0)
+
         for comp in self.components:
             mass = comp.get("mass", 0.0)
             dims = comp.get("dimensions", {"x": 1.0, "y": 1.0, "z": 1.0})
-            # Check if part weighs over 500g
-            if mass > 0.5:
+
+            # Check if part weighs over limit
+            if mass > mass_limit:
                 max_dim = max(dims["x"], dims["y"], dims["z"])
                 min_dim = min(dims["x"], dims["y"], dims["z"])
                  # Check if length is 5x greater than thickness (slender overhang)
@@ -159,6 +183,6 @@ class GeometryPhysicsAnalyzer:
                                 "rpn": 9 * 5 * 3,
                                 "action": "Modify CAD geometry to introduce a minimum operational clearance gap (e.g., 0.5mm clearance)."
                             })
-                except Exception:
-                    # Gracefully skip if shape geometry queries encounter unsupported edge cases
-                    continue
+                except Exception as e:
+                    # Raise error for suppressed geometric calculation failures
+                    raise RuntimeError(f"Corrupt geometry or interference calculation failed between {c1['name']} and {c2['name']}: {e}")

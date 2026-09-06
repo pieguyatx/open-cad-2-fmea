@@ -1,3 +1,11 @@
+"""CAD Extractor Module
+
+This module interfaces with FreeCAD libraries to parse geometric data from CAD
+files (STEP, IGES, FCStd, etc.). It extracts shape properties including face and 
+edge counts, total volume, bounding boxes, and dimensional features like minimum 
+wall thickness and hole diameters for downstream dFMEA evaluation.
+"""
+
 import sys
 import os
 import re
@@ -32,26 +40,8 @@ try:
 except ImportError as e:
     print(f"[Warning] FreeCAD binaries could not be loaded: {e}")
     print("[Warning] CAD extraction features will be disabled.")
+    # Fallback flag if running in a standalone environment without FreeCAD binaries
     FREECAD_AVAILABLE = False
-    # Mock implementations for standalone/testing environments
-    class MockBoundBox:
-        XMin = YMin = ZMin = 0.0
-        XMax = YMax = ZMax = 10.0
-    class MockShape:
-        Faces = [1, 2, 3, 4]
-        Edges = [1, 2, 3, 4, 5, 6]
-        Volume = 100.0
-        BoundBox = MockBoundBox()
-    class MockObject:
-        Shape = MockShape()
-    class MockDocument:
-        Objects = [MockObject()]
-    class MockFreeCAD:
-        def open(self, filepath):
-            return MockDocument()
-    FreeCAD = MockFreeCAD()
-    Part = None
-    pass
 
 
 class FreeCADAssemblyExtractorWin:
@@ -61,6 +51,10 @@ class FreeCADAssemblyExtractorWin:
     def extract_context(self, file_path):
         """Opens a CAD assembly file (.FCStd or .STEP) and reads its parts and joints."""
         file_path = os.path.abspath(file_path)
+        if not FREECAD_AVAILABLE:
+            raise RuntimeError(
+                "FreeCAD modules are not available. Please configure your PYTHONPATH to include FreeCAD/bin."
+            )
         if not os.path.exists(file_path):
             raise FileNotFoundError(f"CAD File not found: {file_path}")
 
@@ -115,7 +109,8 @@ class FreeCADAssemblyExtractorWin:
                             density_g_mm3 = 0.00785  # Generic baseline steel/aluminum density (~7.85 g/cm3)
                             mass = (volume_mm3 * density_g_mm3) / 1000.0  # Converted to kg
                         except Exception:
-                            mass = 0.1
+                            # Stop corrupted CAD from going through
+                            raise RuntimeError(f"Corrupt geometry detected in {obj.Name}: {e}") 
 
                         # 3D Printing check: look for microscopic faces smaller than 1mm^2 
                         # that often cause FDM 3D printer slicers to fail or leave gaps.
@@ -168,12 +163,19 @@ class LocalLLMReasonerWin:
         return raw_text
 
     def infer_failure_modes(self, cad_context):
+        # Strip C++ FreeCAD objects before passing to the JSON serializer
+        safe_context = {
+            "assembly_name": cad_context.get("assembly_name", ""),
+            "components": [{k: v for k, v in c.items() if k != "shape_object"} for c in cad_context.get("components", [])],
+            "joints": cad_context.get("joints", []),
+            "print_warnings": cad_context.get("print_warnings", [])
+        }
         prompt = f"""
 You are an expert Reliability, 3D Printing, and dFMEA Engineer.
 Analyze the following CAD assembly context (Components, Materials, Joints, Print Warnings) and deduce functional failure modes.
 
 CAD CONTEXT:
-{json.dumps(cad_context, indent=2)}
+{json.dumps(safe_context, indent=2)}
 
 OUTPUT REQUIREMENT:
 Return ONLY a valid JSON array of objects. Do not use markdown blocks.
