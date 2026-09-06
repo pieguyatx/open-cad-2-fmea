@@ -1,2 +1,2 @@
-# from src.cad_extractor import FreeCADAssemblyExtractorWin, LocalLLMReasonerWin
-# from src.geometry_analyzer import GeometryPhysicsAnalyzer
+from src.cad_extractor import FreeCADAssemblyExtractorWin, LocalLLMReasonerWin
+from src.geometry_analyzer import GeometryPhysicsAnalyzer
