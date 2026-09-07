@@ -12,6 +12,7 @@ param (
     [switch]$UseAI
 )
 
+# Customize the paths to check here for your installation of FreeCAD
 $FreeCADPaths = @(
     "C:\Program Files\FreeCAD 0.21\bin\freecadcmd.exe",
     "C:\Program Files\FreeCAD 1.0\bin\freecadcmd.exe",

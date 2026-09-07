@@ -32,6 +32,7 @@ def run_pipeline(input_file, output_csv, config_path, use_ai=False):
     fmea_records = []
 
     # 1. 3D Print Warnings
+    print("\n[*] Stage 1: Running 3D Print manufacturability checks...")
     for warn in cad_context.get("print_warnings", []):
         sev, occ, det = 7, 8, 3
         fmea_records.append({
@@ -42,6 +43,7 @@ def run_pipeline(input_file, output_csv, config_path, use_ai=False):
         })
 
     # 2. Physics & Geometry Rules
+    print("\n[*] Stage 2: Running Physics and Geometry checks...")
     geo_analyzer = GeometryPhysicsAnalyzer(cad_context)
     for p_warn in geo_analyzer.analyze_assembly_physics():
         fmea_records.append({
@@ -57,6 +59,7 @@ def run_pipeline(input_file, output_csv, config_path, use_ai=False):
         })
 
     # 3. Material & Component Rules
+    print("\n[*] Stage 3: Running Material and Component rules...")
     for comp in cad_context["components"]:
         c_name = comp["name"]
         c_mat = comp["material"].lower()
@@ -76,7 +79,7 @@ def run_pipeline(input_file, output_csv, config_path, use_ai=False):
 
     # 4. Optional AI Pass
     if use_ai:
-        print("[*] Running Local LLM Functional Reasoning (Ollama)...")
+        print("[*] Stage 4: Running Optional Local LLM Functional Reasoning (Ollama)...")
         reasoner = LocalLLMReasonerWin()
         ai_data = reasoner.infer_failure_modes(cad_context)
         for item in ai_data:

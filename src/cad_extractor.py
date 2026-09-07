@@ -82,7 +82,14 @@ class FreeCADAssemblyExtractorWin:
             else:
                 doc = FreeCAD.openDocument(file_path)
 
-            for obj in doc.Objects:
+            total_objs = len(doc.Objects) # info for progress notification
+
+            for index, obj in enumerate(doc.Objects):
+                
+                # Terminal progress indicator
+                print(f"[*] Extracting CAD Object {index + 1}/{total_objs}: {obj.Label}          ", end="\r")
+                sys.stdout.flush()
+
                 if obj.isDerivedFrom("App::Part") or obj.isDerivedFrom("Part::Feature"):
                     mat_name = ""
                     if hasattr(obj, "Material") and obj.Material:
@@ -148,6 +155,7 @@ class FreeCADAssemblyExtractorWin:
         #             FreeCAD.closeDocument(doc.Name)
         #         except Exception:
         #             pass
+            print("") # Print a clean newline after the loop finishes
             pass # leave document open
 
         return context
