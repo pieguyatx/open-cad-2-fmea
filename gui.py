@@ -111,7 +111,17 @@ class FmeaGuiApp:
         # 2. Mathematical Physics & Geometry Rules
         geo_analyzer = GeometryPhysicsAnalyzer(cad_context)
         for p_warn in geo_analyzer.analyze_assembly_physics():
-            self.fmea_records.append(p_warn)
+            self.fmea_records.append({
+                "Component": p_warn.get("component", "Unknown"),
+                "Function": p_warn.get("function", "Unknown"),
+                "Failure Mode": p_warn.get("failure_mode", "Unknown"),
+                "Effect": p_warn.get("effect", "Unknown"),
+                "Severity": p_warn.get("severity", 5),
+                "Occurrence": p_warn.get("occurrence", 5),
+                "Detection": p_warn.get("detection", 5),
+                "RPN": p_warn.get("rpn", 125),
+                "Action": p_warn.get("action", "None")
+            })
 
         # 3. Material and Component Rules from rules.json
         for comp in cad_context["components"]:

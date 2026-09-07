@@ -1,0 +1,6 @@
+Component,Function,Failure Mode,Effect,Severity,Occurrence,Detection,RPN,Action
+Base,3D Print Manufacturability,Thin Feature / Micro-Face (<1.0mm²),Contains micro-face area of 0.832mm². Risk of slicing gap.,7,8,3,168,Increase feature wall thickness in CAD model
+Assembly,3D Print Manufacturability,Thin Feature / Micro-Face (<1.0mm²),Contains micro-face area of 0.832mm². Risk of slicing gap.,7,8,3,168,Increase feature wall thickness in CAD model
+Stick,Cantilever Structural Support,Fastener Shear / Cantilever Bending Fatigue,"Fasteners snap under combined bending moment and shear loading, causing structural detachment.",8,5,3,120,"Add structural dowel pins, increase fastener thread diameter, or incorporate a support gusset."
+Boom,Cantilever Structural Support,Fastener Shear / Cantilever Bending Fatigue,"Fasteners snap under combined bending moment and shear loading, causing structural detachment.",8,5,3,120,"Add structural dowel pins, increase fastener thread diameter, or incorporate a support gusset."
+Assembly,Cantilever Structural Support,Fastener Shear / Cantilever Bending Fatigue,"Fasteners snap under combined bending moment and shear loading, causing structural detachment.",8,5,3,120,"Add structural dowel pins, increase fastener thread diameter, or incorporate a support gusset."
