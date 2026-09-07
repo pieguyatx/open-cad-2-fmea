@@ -1,6 +1,7 @@
 import json
 import math
 import os
+import sys
 
 class GeometryPhysicsAnalyzer:
     """
@@ -153,11 +154,21 @@ class GeometryPhysicsAnalyzer:
         """
         comps = [c for c in self.components if "shape_object" in c and c["shape_object"] is not None]
         
+        # Info for progress notifications
+        total_comps = len(comps)
+        total_pairs = (total_comps * (total_comps - 1)) // 2
+        current_pair = 0
+
         # Compare every unique pair of parts in the assembly
         for i in range(len(comps)):
             for j in range(i + 1, len(comps)):
                 c1 = comps[i]
                 c2 = comps[j]
+                
+                # Terminal progress indicator
+                print(f"[*] Spatial Interference Check {current_pair}/{total_pairs}: {c1['name']} vs {c2['name']}          ", end="\r")
+                sys.stdout.flush()
+                current_pair += 1
                 
                 shape1 = c1["shape_object"]
                 shape2 = c2["shape_object"]
@@ -186,3 +197,5 @@ class GeometryPhysicsAnalyzer:
                 except Exception as e:
                     # Raise error for suppressed geometric calculation failures
                     raise RuntimeError(f"Corrupt geometry or interference calculation failed between {c1['name']} and {c2['name']}: {e}")
+    
+    print("") # new line after clash check loop finishes
