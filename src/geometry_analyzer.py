@@ -2,6 +2,7 @@ import json
 import math
 import os
 import sys
+import time
 
 class GeometryPhysicsAnalyzer:
     """
@@ -158,6 +159,7 @@ class GeometryPhysicsAnalyzer:
         total_comps = len(comps)
         total_pairs = (total_comps * (total_comps - 1)) // 2
         current_pair = 0
+        stage_start_time = time.time()  # Initialize the global timer for this stage
 
         # Compare every unique pair of parts in the assembly
         for i in range(len(comps)):
@@ -165,8 +167,12 @@ class GeometryPhysicsAnalyzer:
                 c1 = comps[i]
                 c2 = comps[j]
                 
+                # Calculate running elapsed time
+                elapsed_seconds = int(time.time() - stage_start_time)
+                mins, secs = divmod(elapsed_seconds, 60)
+                timer_str = f"{mins:03d}:{secs:02d}"
                 # Terminal progress indicator
-                print(f"[*] Spatial Interference Check {current_pair}/{total_pairs}: {c1['name']} vs {c2['name']}          ", end="\r")
+                print(f"[*] Spatial Interference Check {current_pair}/{total_pairs} [Time elapsed: {timer_str}]: {c1['name']} vs {c2['name']}          ", end="\r")
                 sys.stdout.flush()
                 current_pair += 1
                 

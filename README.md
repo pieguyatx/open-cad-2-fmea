@@ -93,11 +93,13 @@ If you are designing entirely in FreeCAD:
 
 ### 1. Graphical User Interface (Recommended)
 
-Launch the desktop application to browse files, toggle AI analysis, and view RPN scores interactively:
+Launch the desktop application to browse files, toggle AI analysis, and view RPN scores interactively.  For example, in the terminal or in PowerShell, navigate to this code repository and run:
 
 ```powershell
 .\run_gui_win.ps1
 ```
+
+The GUI will load up. Then click the "Select CAD File" button in the upper left to select the appropriate file to analyze.  Then click the "Run dFMEA Analysis" button in the upper left to start the analysis.  For some large assemblies this can take a while, but the terminal should give you a sense of its progress over time.
 
 ### 2. Command-Line Interface (Headless)
 
