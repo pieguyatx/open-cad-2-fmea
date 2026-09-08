@@ -123,14 +123,24 @@ class FreeCADAssemblyExtractorWin:
 
                         # 3D Printing check: look for microscopic faces smaller than 1mm^2 
                         # that often cause FDM 3D printer slicers to fail or leave gaps.
-                        for face in shape.Faces:
-                            if 0.0 < face.Area < 1.0: 
-                                context["print_warnings"].append({
-                                    "component": obj.Label,
-                                    "type": "Thin Feature / Micro-Face (<1.0mm²)",
-                                    "detail": f"Contains micro-face area of {face.Area:.3f}mm². Risk of slicing gap."
-                                })
-                                break
+                        # Evaluate component name and material to filter out metals
+                        search_text = f"{obj.Label} {mat_name}".lower()
+                        metal_keywords = ["steel", "aluminum", "al_", "iron", "metal", "titanium", "brass", "copper", "sheet"]
+                        plastic_keywords = ["pla", "petg", "abs", "tpu", "plastic", "nylon", "resin", "print", "fdm"]
+                        
+                        is_metal = any(kw in search_text for kw in metal_keywords)
+                        is_plastic = any(kw in search_text for kw in plastic_keywords)
+                        
+                        # Only apply the micro-face check if explicitly plastic/printed, or if the material is unknown (not metal)
+                        if is_plastic or not is_metal:
+                            for face in shape.Faces:
+                                if 0.0 < face.Area < 1.0: 
+                                    context["print_warnings"].append({
+                                        "component": obj.Label,
+                                        "type": "Thin Feature / Micro-Face (<1.0mm²)",
+                                        "detail": f"Contains micro-face area of {face.Area:.3f}mm². Risk of slicing gap."
+                                    })
+                                    break
 
                     context["components"].append({
                         "name": obj.Label,
