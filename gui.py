@@ -101,7 +101,7 @@ class FmeaGuiApp:
         # 1. 3D Print Geometry Warnings
         for warn in cad_context.get("print_warnings", []):
             sev, occ, det = 7, 8, 3
-            self.fmea_records.append({
+            self._add_record_live({
                 "Component": warn["component"], "Function": "3D Print Manufacturability",
                 "Failure Mode": warn["type"], "Effect": warn["detail"],
                 "Severity": sev, "Occurrence": occ, "Detection": det, "RPN": sev*occ*det,
@@ -111,7 +111,7 @@ class FmeaGuiApp:
         # 2. Mathematical Physics & Geometry Rules
         geo_analyzer = GeometryPhysicsAnalyzer(cad_context)
         for p_warn in geo_analyzer.analyze_assembly_physics():
-            self.fmea_records.append({
+            self._add_record_live({
                 "Component": p_warn.get("component", "Unknown"),
                 "Function": p_warn.get("function", "Unknown"),
                 "Failure Mode": p_warn.get("failure_mode", "Unknown"),
@@ -134,7 +134,7 @@ class FmeaGuiApp:
                         sev = int(rule.get("severity", 5))
                         occ = int(rule.get("occurrence", 5))
                         det = int(rule.get("detection", 5))
-                        self.fmea_records.append({
+                        self._add_record_live({
                             "Component": c_name, "Function": rule.get("function", "Load Transmission"),
                             "Failure Mode": rule["failure_mode"], "Effect": rule["effect"],
                             "Severity": sev, "Occurrence": occ, "Detection": det, "RPN": sev*occ*det,
@@ -150,7 +150,7 @@ class FmeaGuiApp:
                     sev = int(item.get("severity", 5))
                     occ = int(item.get("occurrence", 5))
                     det = int(item.get("detection", 5))
-                    self.fmea_records.append({
+                    self._add_record_live({
                         "Component": str(item.get("component", "System")), "Function": str(item.get("function", "N/A")),
                         "Failure Mode": str(item.get("failure_mode", "N/A")), "Effect": str(item.get("effect", "N/A")),
                         "Severity": sev, "Occurrence": occ, "Detection": det, "RPN": sev*occ*det,
@@ -162,6 +162,10 @@ class FmeaGuiApp:
         # Sort by Risk Priority Number (RPN) highest-to-lowest so dangerous items appear at the top
         self.fmea_records.sort(key=lambda x: x["RPN"], reverse=True)
 
+        # Clear the live-populated unsorted tree
+        for item in self.tree.get_children():
+            self.tree.delete(item)
+
         for rec in self.fmea_records:
             self.tree.insert("", tk.END, values=(
                 rec["Component"], rec["Function"], rec["Failure Mode"], rec["Effect"],
@@ -169,6 +173,15 @@ class FmeaGuiApp:
             ))
 
         messagebox.showinfo("Success", f"Analysis complete! Found {len(self.fmea_records)} FMEA entries.")
+
+    def _add_record_live(self, record):
+        """Inserts a single record into the table and forces the GUI to redraw."""
+        self.fmea_records.append(record)
+        self.tree.insert("", tk.END, values=(
+            record["Component"], record["Function"], record["Failure Mode"], record["Effect"],
+            record["Severity"], record["Occurrence"], record["Detection"], record["RPN"], record["Action"]
+        ))
+        self.root.update()  # Forces Tkinter to refresh the screen instantly
 
     def export_csv(self):
         """Exports the table data into a CSV file."""
