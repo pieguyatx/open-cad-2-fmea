@@ -204,4 +204,9 @@ class GeometryPhysicsAnalyzer:
                     # Raise error for suppressed geometric calculation failures
                     raise RuntimeError(f"Corrupt geometry or interference calculation failed between {c1['name']} and {c2['name']}: {e}")
     
-    print("") # new line after clash check loop finishes
+        # Summary of analysis timing
+        elapsed_seconds = int(time.time() - stage_start_time)
+        mins, secs = divmod(elapsed_seconds, 60)
+        final_time = f"{mins:03d}:{secs:02d}"
+        # The \n forces the terminal to drop to a new line, preserving the final progress state
+        print(f"\n[+] Spatial Interference Checks Complete! Evaluated {total_pairs}/{total_pairs} pairs in {final_time}.")
